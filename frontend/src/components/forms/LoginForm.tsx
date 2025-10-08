@@ -43,7 +43,7 @@ export const LoginPage = () => {
             {/* Left side - gradient + illustration */}
             <div className="hidden md:flex w-1/2 bg-gradient-to-br from-purple-500 to-indigo-600 items-center justify-center relative">
                 <h1 className="text-white text-4xl font-bold absolute top-10 left-10">
-                    Welcome Back!
+                    Welcome Back to BookHub!
                 </h1>
                 <img
                     src={BookIllustration}
@@ -92,7 +92,7 @@ export const LoginPage = () => {
                                 type="submit"
                                 className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700"
                             >
-                                {isPending ? "Logging in..." : "Login"}
+                                {isPending ? "Logging in..." : "Login to BookHub"}
                             </Button>
                         </form>
                     </Form>
@@ -103,7 +103,7 @@ export const LoginPage = () => {
                             to="/register"
                             className="text-indigo-600 hover:underline font-medium"
                         >
-                            Register
+                            Join BookHub
                         </Link>
                     </p>
                 </div>
