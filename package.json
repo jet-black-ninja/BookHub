@@ -8,7 +8,6 @@
     "backend"
   ],
   "scripts": {
-    "install": "pnpm install",
     "build": "pnpm --filter backend build && pnpm --filter frontend build",
     "start": "concurrently \"pnpm --filter backend start\" \"pnpm --filter frontend preview\"",
     "dev": "concurrently \"pnpm --filter backend dev\" \"pnpm --filter frontend dev\"",

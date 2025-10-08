@@ -11,11 +11,11 @@ app.use(helmet());
 app.use(express.json());
 
 // Example route
-app.get('/', (req, res) => {
-  sendResponse(res, {
-    success: true,
-    message: 'API is running',
-  });
+app.get('/', (_req, res) => {
+	sendResponse(res, {
+		success: true,
+		message: 'API is running',
+	});
 });
 
 // ...other routes
@@ -25,6 +25,5 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+	console.log(`Server running on port ${PORT}`);
 });
-

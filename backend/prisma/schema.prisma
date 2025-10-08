@@ -37,6 +37,8 @@ model User {
   passwordHash String             @map("password_hash")
   role         UserRole
   fullName     String             @map("full_name")
+  isVerified   Boolean            @default(false) @map("is_verified")
+  isDeleted    Boolean            @default(false) @map("is_deleted")
   createdAt    DateTime           @default(now()) @map("created_at")
   updatedAt    DateTime           @updatedAt @map("updated_at")
   universityId String             @unique @map("university_id")
@@ -67,6 +69,7 @@ model Book {
   totalCopies     Int            @default(3) @map("total_copies")
   availableCopies Int            @default(3) @map("available_copies")
   coverImageUrl   String?        @map("cover_image_url")
+  isDeleted       Boolean        @default(false) @map("is_deleted")
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
   Category        Category       @relation(fields: [categoryId], references: [id])
