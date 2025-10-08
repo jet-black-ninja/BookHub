@@ -11,5 +11,131 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+enum BorrowType {
+  INDIVIDUAL
+  GROUP
+}
+
+enum BorrowingStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+  LOST
+}
+
+model User {
+  id           String             @id @default(uuid(7))
+  email        String             @unique
+  passwordHash String             @map("password_hash")
+  role         UserRole
+  fullName     String             @map("full_name")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  universityId String             @unique @map("university_id")
+  borrowings   BorrowingStudent[]
+  reviews      Review[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid(7))
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  books       Book[]
+
+  @@map("categories")
+}
+
+model Book {
+  id              String         @id @default(uuid(7))
+  title           String
+  author          String
+  isbn            String         @unique
+  categoryId      String         @map("category_id")
+  description     String?
+  price           Decimal        @db.Decimal(10, 2)
+  totalCopies     Int            @default(3) @map("total_copies")
+  availableCopies Int            @default(3) @map("available_copies")
+  coverImageUrl   String?        @map("cover_image_url")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  Category        Category       @relation(fields: [categoryId], references: [id])
+  BorrowedBook    BorrowedBook[]
+  Review          Review[]
+
+  @@map("books")
+}
+
+model Borrowing {
+  id           String             @id @default(uuid(7))
+  studentIds   String[]           @map("student_ids")
+  borrowType   BorrowType         @map("borrow_type")
+  borrowDate   DateTime           @default(now()) @map("borrow_date")
+  dueDate      DateTime           @map("due_date")
+  returnDate   DateTime?          @map("return_date")
+  status       BorrowingStatus    @default(ACTIVE)
+  totalFine    Decimal            @default(0) @map("total_fine") @db.Decimal(10, 2)
+  createdAt    DateTime           @default(now()) @map("created_at")
+  students     BorrowingStudent[]
+  BorrowedBook BorrowedBook[]
+
+  @@map("borrowings")
+}
+
+model BorrowedBook {
+  id          String    @id @default(uuid(7))
+  borrowingId String    @map("borrowing_id")
+  bookId      String    @map("book_id")
+  returned    Boolean   @default(false)
+  borrowing   Borrowing @relation(fields: [borrowingId], references: [id], onDelete: Cascade)
+  book        Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@map("borrowed_books")
+}
+
+model BorrowingStudent {
+  id          String    @id @default(uuid(7))
+  borrowingId String    @map("borrowing_id")
+  studentId   String    @map("student_id")
+  borrowing   Borrowing @relation(fields: [borrowingId], references: [id], onDelete: Cascade)
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([borrowingId, studentId])
+  @@map("borrowing_students")
+}
+
+model FineConfig {
+  id                 String   @id @default(uuid(7))
+  dailyFine          Decimal  @default(50.00) @map("daily_fine") @db.Decimal(10, 2)
+  lostBookMultiplier Decimal  @default(2.00) @map("lost_book_multiplier") @db.Decimal(3, 2)
+  overdueThreshold   Int      @default(30) @map("overdue_threshold")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("fine_config")
+}
+
+model Review {
+  id        String   @id @default(uuid(7))
+  bookId    String   @map("book_id")
+  studentId String   @map("student_id")
+  title     String
+  content   String
+  imageUrl  String?  @map("image_url")
+  rating    Int      @default(5)
+  createdAt DateTime @default(now()) @map("created_at")
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, studentId])
+  @@map("reviews")
 }
