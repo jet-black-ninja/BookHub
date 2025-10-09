@@ -12,8 +12,6 @@ import FinesPage from "./pages/students/FinesPage";
 import { ReviewPage } from "./pages/students/ReviewPage";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AdminBooksPage } from "./pages/admin/AdminBooksPage";
-import { AdminBorrowingsPage } from "./pages/admin/AdminBorrowingsPage";
-import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { AdminRoute } from "./components/AdminRoute";
 
 export default function App() {
@@ -38,9 +36,6 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="books" element={<AdminBooksPage />} />
-          <Route path="borrowings" element={<AdminBorrowingsPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          {/* <Route path="/admin/reviews" element={<AdminReviewsPage />} /> optional */}
         </Route>
       </Route>
 

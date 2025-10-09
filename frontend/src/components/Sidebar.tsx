@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Home, BookOpen, Clock, IndianRupeeIcon, Users } from 'lucide-react';
+import { Home, BookOpen, Clock, IndianRupeeIcon } from 'lucide-react';
 
 export const Sidebar = () => {
   const { user } = useAuth();
@@ -20,9 +20,7 @@ export const Sidebar = () => {
   // Admin Navigation
   const adminLinks = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/admin/books', label: 'Manage Books', icon: BookOpen },
-    { path: '/admin/borrowings', label: 'All Borrowings', icon: Clock },
-    { path: '/admin/users', label: 'Manage Users', icon: Users }
+    { path: '/admin/books', label: 'Manage Books', icon: BookOpen }
   ];
 
   const links = user?.role === 'ADMIN' ? adminLinks : studentLinks;
@@ -43,11 +41,10 @@ export const Sidebar = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                isActive(link.path)
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${isActive(link.path)
                   ? 'bg-blue-50 text-blue-600 font-medium'
                   : 'text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <Icon size={20} />
               <span>{link.label}</span>

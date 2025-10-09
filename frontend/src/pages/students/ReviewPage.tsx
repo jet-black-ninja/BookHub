@@ -44,7 +44,7 @@ export const ReviewPage = () => {
         const fetchBorrowedBooks = async () => {
             const token = localStorage.getItem("token");
             try {
-                const res = await fetch(`${BASE_URL}/student/my-borrowings`, {
+                const res = await fetch(`${BASE_URL}/student/my-borrowings?status=RETURNED`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,

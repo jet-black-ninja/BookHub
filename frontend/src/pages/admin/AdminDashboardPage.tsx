@@ -3,33 +3,48 @@ import { useEffect, useState } from "react";
 
 interface SummaryStats {
   totalBooks: number;
-  totalStudents: number;
-  totalBorrowings: number;
-  totalFines: number;
+  totalDeletedBooks: number;
 }
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const AdminDashboardPage = () => {
   const [stats, setStats] = useState<SummaryStats>({
     totalBooks: 0,
-    totalStudents: 0,
-    totalBorrowings: 0,
-    totalFines: 0,
+    totalDeletedBooks: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with your actual API call later
     const fetchStats = async () => {
-      const data = {
-        totalBooks: 120,
-        totalStudents: 85,
-        totalBorrowings: 35,
-        totalFines: 5000,
-      };
-      setStats(data);
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const booksRes = await fetch(`${BASE_URL}/books?page=1&limit=1`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const booksData = await booksRes.json();
+        const totalBooks = booksData.data?.pagination?.totalBooks || 0;
+
+        const deletedRes = await fetch(`${BASE_URL}/books?page=1&limit=1&includeDeleted=true`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const deletedData = await deletedRes.json();
+        const totalDeletedBooks = deletedData.data?.pagination?.totalBooks || 0;
+
+        setStats({ totalBooks, totalDeletedBooks });
+      } catch (err) {
+        console.error("Failed to fetch admin stats:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchStats();
   }, []);
+
+  if (loading) return <p>Loading dashboard...</p>;
 
   return (
     <div className="p-6">
@@ -37,25 +52,15 @@ export const AdminDashboardPage = () => {
       <p className="text-gray-600 mb-6">Overview of your library system.</p>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="p-4 border rounded-lg shadow-sm">
-          <h2 className="text-lg font-medium">Books</h2>
+          <h2 className="text-lg font-medium">Total Books</h2>
           <p className="text-2xl font-bold">{stats.totalBooks}</p>
         </div>
 
         <div className="p-4 border rounded-lg shadow-sm">
-          <h2 className="text-lg font-medium">Students</h2>
-          <p className="text-2xl font-bold">{stats.totalStudents}</p>
-        </div>
-
-        <div className="p-4 border rounded-lg shadow-sm">
-          <h2 className="text-lg font-medium">Borrowings</h2>
-          <p className="text-2xl font-bold">{stats.totalBorrowings}</p>
-        </div>
-
-        <div className="p-4 border rounded-lg shadow-sm">
-          <h2 className="text-lg font-medium">Total Fines (₹)</h2>
-          <p className="text-2xl font-bold">{stats.totalFines}</p>
+          <h2 className="text-lg font-medium">Deleted Books</h2>
+          <p className="text-2xl font-bold">{stats.totalDeletedBooks}</p>
         </div>
       </div>
 
@@ -67,18 +72,6 @@ export const AdminDashboardPage = () => {
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
         >
           Manage Books
-        </Link>
-        <Link
-          to="/admin/borrowings"
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-        >
-          View Borrowings
-        </Link>
-        <Link
-          to="/admin/users"
-          className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
-        >
-          Manage Users
         </Link>
       </div>
     </div>

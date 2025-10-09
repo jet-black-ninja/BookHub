@@ -34,13 +34,13 @@ Borrowing workflow: Student requests → Admin approves → Borrowing tracked wi
 
 ## Technologies Used
 
-Frontend: React, TypeScript, Tailwind CSS
+Frontend: React, TypeScript, Tailwind CSS, ShadCN
 
 Routing: React Router v6
 
 Notifications: react-hot-toast
 
-Forms & Validation: React Hook Form + Zod (optional)
+Forms & Validation: React Hook Form + Zod
 
 ## Folder Structure
 
@@ -50,15 +50,21 @@ client/
 │  ├─ pages/
 │  │  ├─ admin/
 │  │  │  ├─ AdminDashboardPage.tsx
-│  │  │  ├─ AdminUsersPage.tsx
-│  │  │  ├─ AdminBooksPage.tsx
-│  │  │  └─ AdminBorrowingsPage.tsx
+│  │  │  └─ AdminBooksPage.tsx
 │  │  └─ student/
-│  │     ├─ StudentDashboardPage.tsx
-│  │     └─ BrowseBooksPage.tsx
+│  │     ├─ DashboardPage.tsx
+|  |     ├─ BooksPage.tsx
+|  |     ├─ Finespage.tsx
+|  |     ├─ ReviewPage.tsx
+│  │     └─ BorrowingsPage.tsx
 │  ├─ components/
 │  │  ├─ Sidebar.tsx
-│  │  └─ Table.tsx
+|  |  ├─ Layout.tsx
+|  |  ├─ RoleBasedRedirect.tsx
+|  |  ├─ PublicRoute.tsx
+|  |  ├─ ProtectedRoute.tsx
+|  |  ├─ ProtectedRoute.tsx
+│  │  └─ AdminRoute.tsx
 │  ├─ schemas/
 │  │  └─ library.ts         # TypeScript interfaces for Borrowing, Book, User
 │  └─ App.tsx
@@ -87,5 +93,3 @@ pnpm run dev
 ### Admin Pages
 - Dashboard (`/admin/dashboard`)
 - Manage Books (`/admin/books`)
-- All Borrowings (`/admin/borrowings`)
-- Manage Users (`/admin/users`)
