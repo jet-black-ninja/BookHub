@@ -54,18 +54,20 @@ import { sendErrorResponse, sendSuccessResponse } from '../utils/response.js';
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Category'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Category'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden - Admin access required
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const getAllCategories = async (
 	_req: AuthenticatedRequest,
@@ -121,18 +123,20 @@ export const getAllCategories = async (
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Category'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Category'
  *       404:
- *         description: Category not found
+ *         $ref: '#/components/responses/NotFound'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden - Admin access required
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const getCategoryById = async (
 	req: AuthenticatedRequest,
@@ -201,20 +205,22 @@ export const getCategoryById = async (
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Category'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Category'
  *       400:
- *         description: Bad request - validation error
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden - Admin access required
+ *         $ref: '#/components/responses/Forbidden'
  *       409:
- *         description: Conflict - Category name already exists
+ *         $ref: '#/components/responses/Conflict'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const createCategory = async (
 	req: AuthenticatedRequest,
@@ -317,22 +323,24 @@ export const createCategory = async (
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   $ref: '#/components/schemas/Category'
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Category'
  *       400:
- *         description: Bad request - validation error
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: Category not found
+ *         $ref: '#/components/responses/NotFound'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden - Admin access required
+ *         $ref: '#/components/responses/Forbidden'
  *       409:
- *         description: Conflict - Category name already exists
+ *         $ref: '#/components/responses/Conflict'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const updateCategory = async (
 	req: AuthenticatedRequest,
@@ -436,20 +444,23 @@ export const updateCategory = async (
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       404:
- *         description: Category not found
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden - Admin access required
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Category deleted successfully
  *       400:
- *         description: Bad request - Cannot delete category with books
+ *         $ref: '#/components/responses/ValidationError'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const deleteCategory = async (
 	req: AuthenticatedRequest,
