@@ -1,4 +1,4 @@
-import { ApiError, sendError } from '../utils/error';
+import { ApiError, sendError } from '../utils/error.js';
 import { NextFunction, Request, Response } from 'express';
 
 export function errorHandler(
