@@ -4,7 +4,7 @@ import { loginApi, registerApi } from "@/services/api/auth";
 
 interface AuthContextType {
     user: User | null;
-    login: (payload: LoginPayload) => Promise<AuthResponse>;
+    login: (payload: LoginPayload, isAdmin: boolean) => Promise<AuthResponse>;
     register: (payload: RegisterPayload) => Promise<AuthResponse>;
     logout: () => void;
 }
@@ -17,28 +17,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return stored ? JSON.parse(stored) : null;
     });
 
-    const login = async (payload: LoginPayload) => {
+    const login = async (payload: LoginPayload, isAdmin: boolean): Promise<AuthResponse> => {
         try {
-            const loggedInUser = await loginApi(payload);
-            setUser(loggedInUser);
-            localStorage.setItem("user", JSON.stringify(loggedInUser));
-            return { success: "Login successful" };
+            const res = await loginApi(payload, isAdmin);
+            if (res.data) {
+                setUser(res.data.user);
+                localStorage.setItem("user", JSON.stringify(res.data.user));
+                localStorage.setItem("token", res.data.token);
+            }
+            return res;
         } catch (error) {
             console.log(error);
             return {
+                data: { user: {} as User, token: "" },
                 error: error instanceof Error ? error.message : "Login failed. Please try again."
             };
         }
     };
 
-    const register = async (payload: RegisterPayload) => {
+    const register = async (payload: RegisterPayload): Promise<AuthResponse> => {
         try {
             const newUser = await registerApi(payload);
-            setUser(newUser);
+            if (newUser.data) {
+                setUser(newUser.data.user);
+                localStorage.setItem("user", JSON.stringify(newUser.data.user));
+                localStorage.setItem("token", newUser.data.token);
+            }
             localStorage.setItem("user", JSON.stringify(newUser));
-            return { success: "Registration successful" };
+            return newUser;
         } catch (error) {
             return {
+                data: { user: {} as User, token: "" },
                 error: error instanceof Error ? error.message : "Login failed. Please try again."
             };
         }
@@ -47,6 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         setUser(null);
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
     };
 
     return (

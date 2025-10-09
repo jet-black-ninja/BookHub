@@ -1,9 +1,12 @@
-import type { LoginPayload, RegisterPayload, User } from "@/services/types";
+import type { AuthResponse, LoginPayload, RegisterPayload, User } from "@/services/types";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-export const loginApi = async (payload: LoginPayload): Promise<User> => {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
+export const loginApi = async (payload: LoginPayload, isAdmin: boolean): Promise<AuthResponse> => {
+  const url = isAdmin
+    ? `${BASE_URL}/auth/admins/login`
+    : `${BASE_URL}/auth/students/login`;
+  const response = await fetch(`${url}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -14,11 +17,19 @@ export const loginApi = async (payload: LoginPayload): Promise<User> => {
     throw new Error(error.message || "Login failed");
   }
 
-  return response.json();
+  const res: AuthResponse = await response.json();
+
+  if (!response.ok) {
+    return { ...res, error: res.error || "Login failed" };
+  }
+
+  return { ...res, success: res.success || "Login successful" };
 };
 
-export const registerApi = async (payload: RegisterPayload): Promise<User> => {
-  const response = await fetch(`${BASE_URL}/auth/register`, {
+export const registerApi = async (payload: RegisterPayload): Promise<AuthResponse> => {
+  console.log(payload);
+
+  const response = await fetch(`${BASE_URL}/auth/students/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -29,5 +40,11 @@ export const registerApi = async (payload: RegisterPayload): Promise<User> => {
     throw new Error(error.message || "Registration failed");
   }
 
-  return response.json();
+  const res: AuthResponse = await response.json();
+
+  if (!response.ok) {
+    return { ...res, error: res.error || "Registration failed" };
+  }
+
+  return { ...res, success: res.success || "Registration successful" };
 };

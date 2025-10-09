@@ -1,14 +1,22 @@
+
+export type UserRole = "ADMIN" | "STUDENT";
+
 export interface User {
     id: string;
-    name: string;
+    fullName: string;
     email: string;
-    role: "admin" | "student";
+    role: UserRole;
+    universityId: string
     token?: string;
 }
 
 export interface AuthResponse {
     success?: string;
     error?: string;
+    data: {
+        user: User;
+        token: string;
+    };
 }
 
 export interface LoginPayload {
@@ -18,7 +26,8 @@ export interface LoginPayload {
 
 
 export interface RegisterPayload {
-    name: string;
+    fullName: string;
     email: string;
     password: string;
+    universityId: string
 }

@@ -1,73 +1,91 @@
-# React + TypeScript + Vite
+# Library Management System (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+This is a React + Vite frontend for a Library Management System with **Admin** and **Student** roles.
 
-Currently, two official plugins are available:
+- **Admin**: Manage books, borrowings, users, fines.
+- **Student**: Browse books, borrow books, view fines, submit reviews.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Table of Contents
 
-## React Compiler
+Project Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Technologies Used
 
-## Expanding the ESLint configuration
+Folder Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Pages & Components
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+State Management
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Running the Project
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project Overview
+
+This frontend allows:
+
+Admins to manage books, users, and borrowings.
+
+Students to browse books, request borrowings, and view fines.
+
+Borrowing workflow: Student requests → Admin approves → Borrowing tracked with fines.
+
+
+
+## Technologies Used
+
+Frontend: React, TypeScript, Tailwind CSS
+
+Routing: React Router v6
+
+Notifications: react-hot-toast
+
+Forms & Validation: React Hook Form + Zod (optional)
+
+## Folder Structure
+
+```
+client/
+├─ src/
+│  ├─ pages/
+│  │  ├─ admin/
+│  │  │  ├─ AdminDashboardPage.tsx
+│  │  │  ├─ AdminUsersPage.tsx
+│  │  │  ├─ AdminBooksPage.tsx
+│  │  │  └─ AdminBorrowingsPage.tsx
+│  │  └─ student/
+│  │     ├─ StudentDashboardPage.tsx
+│  │     └─ BrowseBooksPage.tsx
+│  ├─ components/
+│  │  ├─ Sidebar.tsx
+│  │  └─ Table.tsx
+│  ├─ schemas/
+│  │  └─ library.ts         # TypeScript interfaces for Borrowing, Book, User
+│  └─ App.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Running the Project
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Install dependencies: 
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+pnpm install
+```
+```
+pnpm run dev
+```
+
+## Pages
+
+### Student Pages
+- Dashboard (`/dashboard`)
+- Browse Books (`/books`)
+- My Borrowings (`/my-borrowings`)
+- My Fines (`/my-fines`)
+- Review (`/review`)
+
+### Admin Pages
+- Dashboard (`/admin/dashboard`)
+- Manage Books (`/admin/books`)
+- All Borrowings (`/admin/borrowings`)
+- Manage Users (`/admin/users`)

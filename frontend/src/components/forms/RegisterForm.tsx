@@ -20,12 +20,13 @@ export const RegisterPage = () => {
     const form = useForm<RegisterFormType>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
-            name: "",
+            fullName: "",
             email: "",
+            universityId:"",
             password: "",
         },
     });
-
+    
     const onSubmit = async (values: RegisterFormType) => {
         setError("");
         setSuccess("")
@@ -69,10 +70,10 @@ export const RegisterPage = () => {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
-                                name="name"
+                                name="fullName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <Label>Name</Label>
+                                        <Label>Full Name</Label>
                                         <Input placeholder="Name" {...field} />
                                         <FormMessage />
                                     </FormItem>
@@ -85,6 +86,17 @@ export const RegisterPage = () => {
                                     <FormItem>
                                         <Label>Email</Label>
                                         <Input placeholder="Email" {...field} />
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="universityId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <Label>University Id</Label>
+                                        <Input placeholder="University Id" {...field} />
                                         <FormMessage />
                                     </FormItem>
                                 )}

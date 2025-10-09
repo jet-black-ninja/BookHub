@@ -9,11 +9,14 @@ import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useState, useTransition } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BookIllustration from "@/assets/undraw_books_wxzz.svg";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const LoginPage = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition()
+    const [isAdmin, setIsAdmin] = useState(false);
+
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -26,14 +29,14 @@ export const LoginPage = () => {
         setError("");
         setSuccess("")
         startTransition(async () => {
-            const data = await login(values);
-            if (data?.error) {
+            const data = await login(values, isAdmin);
+            if (data.error) {
                 setError(data.error);
             }
-            if (data?.success) {
+            if (data.success) {
                 setSuccess(data.success);
                 form.reset();
-                navigate('/');
+                navigate('/dashboard');
             }
         })
     };
@@ -87,6 +90,17 @@ export const LoginPage = () => {
 
                             {error && <p className="text-red-500 text-sm">{error}</p>}
                             {success && <p className="text-green-500 text-sm">{success}</p>}
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="isAdmin"
+                                    checked={isAdmin}
+                                    onCheckedChange={(checked) => setIsAdmin(!!checked)}
+                                />
+                                <Label htmlFor="isAdmin" className="text-sm text-gray-700">
+                                    Login as admin
+                                </Label>
+                            </div>
 
                             <Button
                                 type="submit"
