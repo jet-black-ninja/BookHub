@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import prisma from '../config/database';
-import { UserRole } from '../generated/prisma/enums';
-import { sendResponse } from '../utils/response';
-import { ApiError, sendError } from '../utils/error';
+import prisma from '../config/database.js';
+import { UserRole } from '../generated/prisma/enums.js';
+import { sendResponse } from '../utils/response.js';
+import { ApiError, sendError } from '../utils/error.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 

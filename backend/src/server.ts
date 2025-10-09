@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { errorHandler } from './middlewares/errorHandler.middleware';
-import { sendResponse } from './utils/response';
-import { setupSwagger } from './config/swagger';
+import { errorHandler } from './middlewares/errorHandler.middleware.js';
+import { sendResponse } from './utils/response.js';
+import { setupSwagger } from './config/swagger.js';
 import 'dotenv/config';
-import routes from './routes/index.routes';
+import routes from './routes/index.routes.js';
 
 const app = express();
 

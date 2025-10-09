@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import prisma from '../config/database';
-import { UserRole } from '../generated/prisma/enums';
+import jwt from 'jsonwebtoken';
+import prisma from '../config/database.js';
+import { UserRole } from '../generated/prisma/enums.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
@@ -30,7 +30,7 @@ export const authenticateJWT = async (
 	}
 
 	try {
-		const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+		const decoded = jwt.verify(token, JWT_SECRET);
 
 		if (!decoded || typeof decoded !== 'object') {
 			res.status(401).json({ message: 'Invalid token payload' });

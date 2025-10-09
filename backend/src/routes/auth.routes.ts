@@ -1,5 +1,10 @@
-import {Router} from 'express';
-import {adminLogin, adminRegister, studentLogin, studentRegister,} from '../controllers/auth.controller';
+import { Router } from 'express';
+import {
+	adminLogin,
+	adminRegister,
+	studentLogin,
+	studentRegister,
+} from '../controllers/auth.controller.js';
 
 const router = Router();
 
