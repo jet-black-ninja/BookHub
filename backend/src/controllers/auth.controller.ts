@@ -125,9 +125,11 @@ const validateRegisterInput = (data: RegisterRequest): string | null => {
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/ValidationError'
  *       409:
- *         description: User already exists
+ *         $ref: '#/components/responses/Conflict'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const studentRegister = async (
 	req: Request,
@@ -224,9 +226,11 @@ export const studentRegister = async (
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/ValidationError'
  *       409:
- *         description: User already exists
+ *         $ref: '#/components/responses/Conflict'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const adminRegister = async (
 	req: Request,
@@ -324,9 +328,12 @@ export const adminRegister = async (
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
  *         description: Invalid credentials or unverified account
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const studentLogin = async (
 	req: Request,
@@ -426,9 +433,12 @@ export const studentLogin = async (
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
  *         description: Invalid credentials
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 export const adminLogin = async (
 	req: Request,
