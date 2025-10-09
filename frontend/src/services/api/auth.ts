@@ -1,4 +1,4 @@
-import type { AuthResponse, LoginPayload, RegisterPayload, User } from "@/services/types";
+import type { AuthResponse, LoginPayload, RegisterPayload } from "@/services/types";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 

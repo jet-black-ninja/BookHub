@@ -42,14 +42,16 @@ export const ReviewPage = () => {
     const BASE_URL = import.meta.env.VITE_BACKEND_URL;
     useEffect(() => {
         const fetchBorrowedBooks = async () => {
+            const token = localStorage.getItem("token");
             try {
-                const res = await fetch(`${BASE_URL}/api/students/${user?.id}/borrowed-books`);
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(`HTTP error ${res.status}: ${text}`);
-                }
+                const res = await fetch(`${BASE_URL}/student/my-borrowings`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
                 const data = await res.json();
-                setBorrowedBooks(data.books);
+                setBorrowedBooks(data.data || []);
             } catch (err) {
                 console.log(err);
             }
@@ -60,12 +62,14 @@ export const ReviewPage = () => {
     const onSubmit = async (values: ReviewFormType) => {
         setError("");
         setSuccess("");
-
+        const token = localStorage.getItem("token");
         try {
-            // Call your backend API here
-            const res = await fetch(`${BASE_URL}/api/reviews`, {
+            const res = await fetch(`${BASE_URL}/student/reviews`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
                 body: JSON.stringify({ ...values, studentId: user?.id }),
             });
             const data = await res.json();

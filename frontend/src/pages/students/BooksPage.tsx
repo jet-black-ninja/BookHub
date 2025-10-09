@@ -1,32 +1,80 @@
+import { useAuth } from "@/context/AuthContext";
 import type { Book } from "@/schemas/library";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export const BooksPage = () => {
+  const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [borrowLoading, setBorrowLoading] = useState<string | null>(null); // track book being borrowed
+
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+  const fetchBooks = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${BASE_URL}/student/books`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setBooks(data.data.books || []);
+    } catch (err) {
+      console.error("Failed to fetch books", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const res = await fetch("http://localhost:4000/api/books");
-        const data = await res.json();
-        setBooks(data);
-      } catch (err) {
-        console.error("Failed to fetch books", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBooks();
   }, []);
 
+  // Borrow book function
+  const handleBorrowBook = async (bookId: string) => {
+    const token = localStorage.getItem("token");
+    setBorrowLoading(bookId);
+    const borrowType = "INDIVIDUAL";
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 30);
+    try {
+      const res = await fetch(`${BASE_URL}/student/borrow`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bookId,
+          borrowType,
+          studentEmails: [user?.email],
+          dueDate: dueDate.toISOString(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Book borrowed successfully!");
+        fetchBooks();
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error("Failed to borrow book:", err);
+    } finally {
+      setBorrowLoading(null);
+    }
+  };
+
+  // Filter books by search
   const filtered = books.filter(
     (b) =>
       b.title.toLowerCase().includes(search.toLowerCase()) ||
       b.author.toLowerCase().includes(search.toLowerCase()) ||
-      b.category.name.toLowerCase().includes(search.toLowerCase())
+      b.category?.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -60,12 +108,10 @@ export const BooksPage = () => {
               />
               <h3 className="font-semibold text-lg">{book.title}</h3>
               <p className="text-sm text-gray-600">{book.author}</p>
-              <p className="text-xs text-gray-500">{book.category.name}</p>
+              <p className="text-xs text-gray-500">{book.category?.name || "No category"}</p>
 
               <p
-                className={`text-sm mt-1 mb-2 ${book.availableCopies > 0
-                    ? "text-green-600"
-                    : "text-red-500"
+                className={`text-sm mt-1 mb-2 ${book.availableCopies > 0 ? "text-green-600" : "text-red-500"
                   }`}
               >
                 {book.availableCopies > 0
@@ -74,14 +120,18 @@ export const BooksPage = () => {
               </p>
 
               <button
-                disabled={book.availableCopies === 0}
-                className={`w-full px-3 py-2 rounded ${book.availableCopies === 0
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={book.availableCopies === 0 || borrowLoading === book.id}
+                className={`w-full px-3 py-2 rounded ${book.availableCopies === 0 || borrowLoading === book.id
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
                   }`}
-                onClick={() => alert(`Borrowing ${book.title}`)}
+                onClick={() => handleBorrowBook(book.id)}
               >
-                Borrow
+                {borrowLoading === book.id
+                  ? "Borrowing..."
+                  : book.availableCopies === 0
+                    ? "Unavailable"
+                    : "Borrow"}
               </button>
             </div>
           ))}
