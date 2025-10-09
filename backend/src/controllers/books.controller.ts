@@ -2,6 +2,10 @@ import { Response } from 'express';
 import prisma from '../config/database.js';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { sendErrorResponse, sendSuccessResponse } from '../utils/response.js';
+import {
+	deleteFromCloudinary,
+	uploadToCloudinary,
+} from '../config/cloudinary.js';
 
 /**
  * @swagger
@@ -361,9 +365,36 @@ export const getBookById = async (
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/CreateBookRequest'
+ *             type: object
+ *             required:
+ *               - title
+ *               - author
+ *               - isbn
+ *               - categoryId
+ *               - price
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               isbn:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               totalCopies:
+ *                 type: integer
+ *                 minimum: 1
+ *                 default: 3
+ *               coverImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: Book cover image file
  *     responses:
  *       201:
  *         description: Book created successfully
@@ -398,7 +429,6 @@ export const createBook = async (
 			description,
 			price,
 			totalCopies = 3,
-			coverImageUrl,
 		} = req.body;
 
 		// Validation
@@ -436,6 +466,21 @@ export const createBook = async (
 			return;
 		}
 
+		// Handle cover image upload
+		let coverImageUrl = '';
+		if (req.file) {
+			try {
+				coverImageUrl = await uploadToCloudinary(
+					req.file.buffer,
+					req.file.originalname
+				);
+			} catch (uploadError) {
+				console.error('Error uploading image:', uploadError);
+				sendErrorResponse(res, 'Failed to upload cover image', 500);
+				return;
+			}
+		}
+
 		const book = await prisma.book.create({
 			data: {
 				title,
@@ -444,9 +489,9 @@ export const createBook = async (
 				categoryId,
 				description,
 				price: parseFloat(price),
-				totalCopies,
-				availableCopies: totalCopies,
-				coverImageUrl,
+				totalCopies: parseInt(totalCopies),
+				availableCopies: parseInt(totalCopies),
+				coverImageUrl: coverImageUrl || null,
 			},
 			include: {
 				Category: {
@@ -484,9 +529,29 @@ export const createBook = async (
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/UpdateBookRequest'
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               isbn:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               totalCopies:
+ *                 type: integer
+ *                 minimum: 1
+ *               coverImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: Book cover image file
  *     responses:
  *       200:
  *         description: Book updated successfully
@@ -524,7 +589,6 @@ export const updateBook = async (
 			description,
 			price,
 			totalCopies,
-			coverImageUrl,
 		} = req.body;
 
 		// Check if book exists
@@ -566,7 +630,7 @@ export const updateBook = async (
 		}
 
 		// Validate totalCopies if provided
-		if (totalCopies !== undefined && totalCopies < 1) {
+		if (totalCopies !== undefined && parseInt(totalCopies) < 1) {
 			sendErrorResponse(res, 'Total copies must be at least 1', 400);
 			return;
 		}
@@ -575,11 +639,35 @@ export const updateBook = async (
 		let availableCopies = existingBook.availableCopies;
 		if (
 			totalCopies !== undefined &&
-			totalCopies !== existingBook.totalCopies
+			parseInt(totalCopies) !== existingBook.totalCopies
 		) {
 			const borrowedCopies =
 				existingBook.totalCopies - existingBook.availableCopies;
-			availableCopies = Math.max(0, totalCopies - borrowedCopies);
+			availableCopies = Math.max(
+				0,
+				parseInt(totalCopies) - borrowedCopies
+			);
+		}
+
+		// Handle cover image upload
+		let coverImageUrl = existingBook.coverImageUrl;
+		if (req.file) {
+			try {
+				// Delete old image if it exists
+				if (existingBook.coverImageUrl) {
+					await deleteFromCloudinary(existingBook.coverImageUrl);
+				}
+
+				// Upload new image
+				coverImageUrl = await uploadToCloudinary(
+					req.file.buffer,
+					req.file.originalname
+				);
+			} catch (uploadError) {
+				console.error('Error uploading image:', uploadError);
+				sendErrorResponse(res, 'Failed to upload cover image', 500);
+				return;
+			}
 		}
 
 		const updateData: any = {};
@@ -590,11 +678,12 @@ export const updateBook = async (
 		if (description !== undefined) updateData.description = description;
 		if (price !== undefined) updateData.price = parseFloat(price);
 		if (totalCopies !== undefined) {
-			updateData.totalCopies = totalCopies;
+			updateData.totalCopies = parseInt(totalCopies);
 			updateData.availableCopies = availableCopies;
 		}
-		if (coverImageUrl !== undefined)
+		if (req.file) {
 			updateData.coverImageUrl = coverImageUrl;
+		}
 
 		const book = await prisma.book.update({
 			where: { id },
@@ -699,6 +788,11 @@ export const deleteBook = async (
 		}
 
 		if (permanent) {
+			// Delete cover image from cloudinary if it exists
+			if (existingBook.coverImageUrl) {
+				await deleteFromCloudinary(existingBook.coverImageUrl);
+			}
+
 			// Permanent deletion
 			await prisma.book.delete({
 				where: { id },
