@@ -55,6 +55,8 @@ A minimal library management system with role-based access for admins and studen
   - Individual borrowing (single student)
   - Group borrowing with email validation
   - View borrowing history and active loans
+  - Enhanced return process with damage assessment
+  - Report lost books with automatic fine calculation
 - **Review System**
   - Submit comprehensive reviews (title, content, rating 1-5)
   - Optional image upload support
@@ -69,6 +71,12 @@ A minimal library management system with role-based access for admins and studen
 - **Overdue Fine**: Configurable daily charge (default: ₹50/day)
 - **Lost Book Policy**: After 30 days overdue
   - Charge: 200% of book price + accumulated fines
+  - Book removed from available inventory
+- **Damage Assessment**: Books assessed for damage on return
+  - No Damage: No additional charges
+  - Small Damage: 10% of book price (configurable)
+  - Large Damage: 50% of book price (configurable)
+- **Lost Book Reporting**: Students can report books as lost before returning
 - **Borrowing Limit**: 1 book maximum per active transaction
 - **Review Eligibility**: Only students who have borrowed the book can review
 
@@ -238,10 +246,16 @@ CLOUDINARY_API_SECRET=your-api-secret
 - **Category** - Book categorization
 - **Book** - Library inventory
 - **Borrowing** - Loan transactions
-- **BorrowedBook** - Book-specific borrowing details
+- **BorrowedBook** - Book-specific borrowing details with damage tracking
 - **BorrowingStudent** - Student-borrowing relationships
-- **Review** - Book reviews and ratings
-- **FineConfig** - System configuration for fines
+- **Review** - Book reviews and ratings with image support
+- **FineConfig** - System configuration for fines and damage penalties
+
+### Key Enums
+- **UserRole** - ADMIN, STUDENT
+- **BorrowType** - INDIVIDUAL, GROUP
+- **BorrowingStatus** - ACTIVE, RETURNED, OVERDUE, LOST
+- **DamageLevel** - NONE, SMALL, LARGE
 
 ### Key Relationships
 - One-to-Many: Category → Books
@@ -279,7 +293,8 @@ CLOUDINARY_API_SECRET=your-api-secret
 - `GET /categories` - Get categories picklist
 - `POST /borrow` - Borrow book (individual/group)
 - `GET /my-borrowings` - Get borrowing history
-- `PATCH /return/:borrowingId` - Return borrowed book
+- `PATCH /return/:borrowingId` - Return borrowed book with damage assessment
+- `PATCH /report-lost/:borrowingId` - Report borrowed book as lost
 
 ### Student - Reviews (`/api/v1/student`) Student Only
 - `POST /reviews` - Create book review
@@ -372,8 +387,10 @@ pnpm test             # Run tests (when implemented)
 - [x] Advanced search (title, author, ISBN)
 - [x] Individual and group borrowing
 - [x] Automatic borrowing validation
-- [x] Fine calculation system
-- [x] Review system with ratings
+- [x] Enhanced return process with damage assessment
+- [x] Lost book reporting functionality
+- [x] Fine calculation system with damage penalties
+- [x] Review system with ratings and image upload
 - [x] Borrowing history tracking
 
 ### System Features
