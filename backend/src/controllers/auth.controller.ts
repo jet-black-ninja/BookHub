@@ -168,7 +168,7 @@ export const studentRegister = async (
 		const saltRounds = 12;
 		const passwordHash = await bcrypt.hash(password, saltRounds);
 
-		// Create user
+		// Create user (auto-verified)
 		const user = await prisma.user.create({
 			data: {
 				email,
@@ -176,6 +176,7 @@ export const studentRegister = async (
 				fullName,
 				universityId,
 				role: UserRole.STUDENT,
+				isVerified: true, // Students are auto-verified
 			},
 			select: {
 				id: true,

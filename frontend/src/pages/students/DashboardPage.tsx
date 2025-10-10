@@ -356,7 +356,7 @@ const BorrowingCard = ({
                   className="inline-flex items-center px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
                 >
                   <Users className="h-3 w-3 mr-1" />
-                  {s.student.fullName}
+                  {s.fullName}
                 </span>
               ))}
             </div>

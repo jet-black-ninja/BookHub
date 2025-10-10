@@ -876,7 +876,7 @@ export const getMyBorrowings = async (
 				status: borrowing.status,
 				totalFine: borrowing.totalFine,
 				book: borrowing.BorrowedBook[0]?.book || null,
-				students: borrowing.students.map((s) => s.student),
+				students: borrowing.students,
 			};
 		});
 
@@ -941,8 +941,9 @@ export const getMyBorrowings = async (
  *                       type: number
  *                     damageFine:
  *                       type: number
- *                     lostBookFine:
+ *                     missingBookFine:
  *                       type: number
+ *                       description: 200% penalty applied for any late return
  *                     totalFine:
  *                       type: number
  *                     isOverdue:
@@ -1036,7 +1037,8 @@ export const returnBook = async (
 		const overdueThreshold = fineConfig?.overdueThreshold || 30; // Default 30 days
 		const lostBookMultiplier = fineConfig?.lostBookMultiplier || 2.0; // Default 200%
 
-		// Determine if book should be marked as LOST (returned more than threshold days after due date)
+		// Determine if book should be marked as LOST
+		// Books returned more than threshold days late are marked as LOST status
 		const isLostBook = overdueDays > overdueThreshold;
 		
 		// Calculate overdue fine (applies even for lost books)
@@ -1047,26 +1049,27 @@ export const returnBook = async (
 			);
 		}
 
-		// Calculate damage fine based on book price and damage level
-		// Fine calculation rules:
-		// - Missing book (not returned or returned after deadline) = 200% of book price (handled separately)
-		// - Late return (after due date) = ₹50 per extra day
-		// - Small damage = 10% of book price
-		// - Large damage = 50% of book price
+		// Calculate fines based on book price and damage level
+		// Fine calculation rules (updated based on your requirement):
+		// - Any late return = 200% of book price (missing penalty) + daily late fee
+		// - Extremely late return (>30 days) = marked as LOST status but same fine calculation
+		// - Small damage = 10% of book price (additional)
+		// - Large damage = 50% of book price (additional)
 		let damageFine = 0;
-		let lostBookFine = 0;
+		let missingBookFine = 0; // 200% penalty for any late return
 		const borrowedBook = borrowing.BorrowedBook[0];
 		
 		if (borrowedBook) {
 			const bookPrice = parseFloat(borrowedBook.book.price.toString());
 			
-			// If book is returned more than threshold days late, it's considered lost
-			if (isLostBook) {
-				lostBookFine = parseFloat((bookPrice * parseFloat(lostBookMultiplier.toString())).toFixed(2));
-				// For lost books, we don't apply additional damage fines as the lost fine is already substantial
-				damageFine = 0;
-			} else if (damageLevel !== 'NONE') {
-				// Apply damage fines only if book is not lost
+			// Apply missing book fine (200% of book price) for ANY late return
+			if (isOverdue) {
+				missingBookFine = parseFloat((bookPrice * parseFloat(lostBookMultiplier.toString())).toFixed(2));
+			}
+			
+			// Apply damage fines in addition to missing penalty (if applicable)
+			if (damageLevel !== 'NONE' && !isLostBook) {
+				// For truly lost books (>30 days late), we don't add extra damage fines
 				const smallDamagePercentage = fineConfig?.smallDamagePercentage || 0.1; // Default 10%
 				const largeDamagePercentage = fineConfig?.largeDamagePercentage || 0.5; // Default 50%
 				
@@ -1084,7 +1087,7 @@ export const returnBook = async (
 			}
 		}
 
-		const totalFine = parseFloat((overdueFine + damageFine + lostBookFine).toFixed(2));
+		const totalFine = parseFloat((overdueFine + damageFine + missingBookFine).toFixed(2));
 
 		// Determine final status
 		let finalStatus: 'RETURNED' | 'OVERDUE' | 'LOST';
@@ -1117,7 +1120,7 @@ export const returnBook = async (
 					damageNotes: isLostBook 
 						? `Book returned ${overdueDays} days late and marked as lost. ${damageNotes || ''}`.trim()
 						: damageNotes || null,
-					damageFine: damageFine + lostBookFine, // Combined damage and lost book fine
+					damageFine: damageFine + missingBookFine, // Combined damage and missing book fine
 				},
 			});
 
@@ -1143,7 +1146,7 @@ export const returnBook = async (
 				returnDate: result.returnDate,
 				overdueFine,
 				damageFine,
-				lostBookFine,
+				missingBookFine,
 				totalFine,
 				isOverdue,
 				isLostBook,
@@ -1152,7 +1155,7 @@ export const returnBook = async (
 				status: finalStatus,
 			},
 			isLostBook 
-				? `Book marked as lost due to being returned ${overdueDays} days late`
+				? `Book marked as lost due to being returned ${overdueDays} days late. Total fine includes ₹${overdueFine} late fee and ₹${missingBookFine} missing book penalty.`
 				: 'Book returned successfully'
 		);
 	} catch (error) {

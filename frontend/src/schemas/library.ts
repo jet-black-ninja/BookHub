@@ -48,18 +48,11 @@ export interface Borrowing {
         coverImageUrl: string | null;
     } | null;
     students?: {
-        student: {
-            fullName: string;
-            id: string;
-        };
+        fullName: string;
+        email: string;
     }[];
 }
 
-export interface Student {
-  id: string;
-  fullName: string;
-  email: string;
-}
 export interface Student {
   id: string;
   fullName: string;

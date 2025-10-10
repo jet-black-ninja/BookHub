@@ -1,5 +1,5 @@
 import type { Borrowing } from "@/schemas/library";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ReturnBookModal } from "@/components/ReturnBookModal";
 
 export default function BorrowingsPage() {
@@ -18,7 +18,7 @@ export default function BorrowingsPage() {
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   // Fetch all borrowings
-  const fetchBorrowings = async () => {
+  const fetchBorrowings = useCallback(async () => {
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${BASE_URL}/student/my-borrowings`, {
@@ -34,11 +34,11 @@ export default function BorrowingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [BASE_URL]);
 
   useEffect(() => {
     fetchBorrowings();
-  }, []);
+  }, [fetchBorrowings]);
 
   // Handle returning a book - opens modal
   const handleReturnBook = (borrowingId: string, bookTitle: string) => {
@@ -59,6 +59,34 @@ export default function BorrowingsPage() {
 
   const handleReturnSuccess = () => {
     fetchBorrowings(); // Refresh the borrowings list
+  };
+
+  // Handle reporting a book as lost
+  const handleReportLost = async (borrowingId: string, bookTitle: string) => {
+    if (!confirm(`Are you sure you want to report "${bookTitle}" as lost? This will apply the full replacement cost as a fine.`)) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${BASE_URL}/student/report-lost/${borrowingId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Book reported as lost. Fine: ₹${data.data.lostBookFine}`);
+        fetchBorrowings(); // Refresh the borrowings list
+      } else {
+        alert(data.message || "Failed to report book as lost");
+      }
+    } catch (err) {
+      console.error("Failed to report lost book:", err);
+      alert("Failed to report book as lost. Please try again.");
+    }
   };
 
   if (loading) return <p>Loading your borrowings...</p>;
@@ -88,12 +116,26 @@ export default function BorrowingsPage() {
                 <p>
                   <span className="font-medium">Type:</span> {b.borrowType}
                 </p>
+                {b.borrowType === "GROUP" && b.students && b.students.length > 0 && (
+                  <div>
+                    <span className="font-medium">Group Members:</span>
+                    <div className="ml-2 mt-1">
+                      {b.students.map((student, index) => (
+                        <p key={index} className="text-xs text-gray-600">
+                          • {student?.fullName || "Unknown"}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <p
                   className={`font-medium ${b.status === "OVERDUE"
                     ? "text-red-600"
                     : b.status === "RETURNED"
                       ? "text-gray-500"
-                      : "text-green-600"
+                      : b.status === "LOST"
+                        ? "text-red-800"
+                        : "text-green-600"
                     }`}
                 >
                   Status: {b.status}
@@ -126,8 +168,18 @@ export default function BorrowingsPage() {
                       }`}
                     onClick={() => handleReturnBook(b.id, b.book?.title || "Unknown Book")}
                   >
-                    {b.status === "RETURNED" ? "Returned" : "Return Book"}
+                    {b.status === "RETURNED" ? "Returned" : b.status === "LOST" ? "Lost" : "Return Book"}
                   </button>
+
+                  {/* Report as Lost button - only show for active borrowings */}
+                  {b.status === "ACTIVE" && (
+                    <button
+                      className="mt-2 w-full px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
+                      onClick={() => handleReportLost(b.id, b.book?.title || "Unknown Book")}
+                    >
+                      Report as Lost
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="mb-4 border p-2 rounded-lg text-center text-gray-500">
