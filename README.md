@@ -2,6 +2,8 @@
 
 A comprehensive library management system with role-based access control, automated fine calculation, and review functionality built with modern web technologies.
 
+🌐 **Live Demo**: [https://bookhub-zone.onrender.com/](https://bookhub-zone.onrender.com/)
+
 ## Table of Contents
 - [Problem Statement](#problem-statement)
 - [Features](#features)
@@ -163,7 +165,7 @@ backend/
 
 ### Base URL
 - **Development**: `http://localhost:5000/api/v1`
-- **Production**: `https://your-railway-app.railway.app/api/v1`
+- **Production**: ` https://bookhub-hkv4.onrender.com/`
 
 ## Setup & Installation
 
@@ -235,6 +237,7 @@ CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 ### Development vs Production
+
 - **Development**: Uses local PostgreSQL or development database
 - **Production**: Uses Neon PostgreSQL with SSL requirements
 
@@ -287,6 +290,7 @@ CLOUDINARY_API_SECRET=your-api-secret
 - `PATCH /:id/restore` - Restore soft-deleted book
 
 ### Student - Books (`/api/v1/student`) Student Only
+
 - `GET /books` - Browse available books
 - `GET /books/:id` - Get book details with reviews
 - `GET /categories` - Get categories picklist
@@ -296,6 +300,7 @@ CLOUDINARY_API_SECRET=your-api-secret
 - `PATCH /report-lost/:borrowingId` - Report borrowed book as lost
 
 ### Student - Reviews (`/api/v1/student`) Student Only
+
 - `POST /reviews` - Create book review
 - `GET /reviews` - Get user's reviews
 - `PUT /reviews/:id` - Update review

@@ -13,7 +13,7 @@ export const Sidebar = () => {
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/books', label: 'Browse Books', icon: BookOpen },
     { path: '/my-borrowings', label: 'My Borrowings', icon: Clock },
-    { path: '/my-fines', label: 'My Fines', icon: IndianRupeeIcon },
+    // { path: '/my-fines', label: 'My Fines', icon: IndianRupeeIcon },
     { path: '/review', label: 'Submit Review', icon: BookOpen }
   ];
 

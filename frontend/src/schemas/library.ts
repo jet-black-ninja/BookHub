@@ -63,3 +63,22 @@ export interface Student {
   fullName: string;
   email: string;
 }
+
+export interface Review {
+  id: string;
+  title: string;
+  content: string;
+  rating: number;
+  imageUrl: string | null;
+  createdAt: string;
+  book: {
+    id: string;
+    title: string;
+    author: string;
+  };
+  student: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+}

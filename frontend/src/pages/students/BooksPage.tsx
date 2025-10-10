@@ -2,12 +2,23 @@ import type { Book } from "@/schemas/library";
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { BorrowBookModal } from "@/components/BorrowBookModal";
+import { BookReviewsModal } from "@/components/BookReviewsModal";
 
 export const BooksPage = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [borrowModal, setBorrowModal] = useState<{
+    isOpen: boolean;
+    bookId: string;
+    bookTitle: string;
+  }>({
+    isOpen: false,
+    bookId: "",
+    bookTitle: "",
+  });
+
+  const [reviewsModal, setReviewsModal] = useState<{
     isOpen: boolean;
     bookId: string;
     bookTitle: string;
@@ -62,6 +73,23 @@ export const BooksPage = () => {
     fetchBooks(); // Refresh the books list
   };
 
+  // Handle opening reviews modal
+  const handleViewReviews = (bookId: string, bookTitle: string) => {
+    setReviewsModal({
+      isOpen: true,
+      bookId,
+      bookTitle,
+    });
+  };
+
+  const handleCloseReviewsModal = () => {
+    setReviewsModal({
+      isOpen: false,
+      bookId: "",
+      bookTitle: "",
+    });
+  };
+
   // Filter books by search
   const filtered = books.filter(
     (b) =>
@@ -88,11 +116,11 @@ export const BooksPage = () => {
       ) : filtered.length === 0 ? (
         <p className="text-gray-500">No books found.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1  md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((book) => (
             <div
               key={book.id}
-              className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition"
+              className="border rounded-lg p-3 min-w-[200px] bg-white shadow-sm hover:shadow-md transition "
             >
               <img
                 src={book.coverImageUrl || "/placeholder.png"}
@@ -114,7 +142,7 @@ export const BooksPage = () => {
 
               <button
                 disabled={book.availableCopies === 0}
-                className={`w-full px-3 py-2 rounded ${book.availableCopies === 0
+                className={`w-full px-3 py-2 rounded mb-2 ${book.availableCopies === 0
                   ? "bg-gray-300 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 text-white"
                   }`}
@@ -123,6 +151,13 @@ export const BooksPage = () => {
                 {book.availableCopies === 0
                   ? "Unavailable"
                   : "Borrow"}
+              </button>
+
+              <button
+                className="w-full px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm"
+                onClick={() => handleViewReviews(book.id, book.title)}
+              >
+                View Reviews
               </button>
             </div>
           ))}
@@ -143,6 +178,14 @@ export const BooksPage = () => {
         bookId={borrowModal.bookId}
         bookTitle={borrowModal.bookTitle}
         onBorrowSuccess={handleBorrowSuccess}
+      />
+
+      {/* Book Reviews Modal */}
+      <BookReviewsModal
+        isOpen={reviewsModal.isOpen}
+        onClose={handleCloseReviewsModal}
+        bookId={reviewsModal.bookId}
+        bookTitle={reviewsModal.bookTitle}
       />
     </div>
   );
