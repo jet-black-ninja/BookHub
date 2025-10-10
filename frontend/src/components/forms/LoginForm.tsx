@@ -41,6 +41,18 @@ export const LoginPage = () => {
         })
     };
 
+    const handleDemoLogin = () => {
+        const demoCredentials = isAdmin 
+            ? { email: "admin@mail.com", password: "654321" }
+            : { email: "test@mail.com", password: "123456" };
+        
+        form.setValue("email", demoCredentials.email);
+        form.setValue("password", demoCredentials.password);
+        
+        // Automatically submit the form with demo credentials
+        onSubmit(demoCredentials);
+    };
+
     return (
         <div className="min-h-screen flex">
             {/* Left side - gradient + illustration */}
@@ -102,9 +114,38 @@ export const LoginPage = () => {
                                 </Label>
                             </div>
 
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t border-gray-300" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-white px-2 text-gray-500">Demo Login</span>
+                                </div>
+                            </div>
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full border-purple-300 text-purple-600 hover:bg-purple-50"
+                                onClick={handleDemoLogin}
+                                disabled={isPending}
+                            >
+                                {isPending ? "Logging in..." : `Login as Demo ${isAdmin ? 'Admin' : 'User'}`}
+                            </Button>
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t border-gray-300" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-white px-2 text-gray-500">Or continue with your account</span>
+                                </div>
+                            </div>
+
                             <Button
                                 type="submit"
                                 className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700"
+                                disabled={isPending}
                             >
                                 {isPending ? "Logging in..." : "Login to BookHub"}
                             </Button>
