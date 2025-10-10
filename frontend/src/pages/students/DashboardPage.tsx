@@ -305,16 +305,13 @@ const BorrowingCard = ({
 
       {/* Borrowed Books */}
       <div className="space-y-3 mb-4">
-        {borrowing.BorrowedBook.map((bb) => (
-          <div
-            key={bb.id}
-            className="flex items-center gap-4 p-3 bg-white rounded-lg border"
-          >
+        {borrowing.book ? (
+          <div className="flex items-center gap-4 p-3 bg-white rounded-lg border">
             <div className="flex-shrink-0">
-              {bb.book.coverImageUrl ? (
+              {borrowing.book.coverImageUrl ? (
                 <img
-                  src={bb.book.coverImageUrl}
-                  alt={bb.book.title}
+                  src={borrowing.book.coverImageUrl}
+                  alt={borrowing.book.title}
                   className="h-16 w-12 object-cover rounded shadow-sm"
                 />
               ) : (
@@ -325,11 +322,11 @@ const BorrowingCard = ({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-gray-800 truncate">
-                {bb.book.title}
+                {borrowing.book.title}
               </p>
-              <p className="text-sm text-gray-500">{bb.book.author}</p>
+              <p className="text-sm text-gray-500">{borrowing.book.author}</p>
             </div>
-            {bb.returned && (
+            {borrowing.status === "RETURNED" && (
               <div className="flex-shrink-0">
                 <div className="inline-flex items-center px-2 py-1 bg-green-100 rounded text-xs text-green-700">
                   <CheckCircle className="h-3 w-3 mr-1" />
@@ -338,7 +335,12 @@ const BorrowingCard = ({
               </div>
             )}
           </div>
-        ))}
+        ) : (
+          <div className="text-center py-4 text-gray-500">
+            <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+            <p>No book information available</p>
+          </div>
+        )}
       </div>
 
       {/* Group Members */}

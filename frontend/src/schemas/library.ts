@@ -15,7 +15,7 @@ export interface Book {
     totalCopies: number;
     availableCopies: number;
     coverImageUrl: string | null;
-    category: Category
+    Category: Category
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
@@ -42,7 +42,11 @@ export interface Borrowing {
     status: "ACTIVE" | "RETURNED" | "OVERDUE" | "LOST";
     borrowType: "INDIVIDUAL" | "GROUP";
     totalFine: number;           // Decimal from backend converted to number
-    BorrowedBook: BorrowedBook[];
+    book: {
+        title: string;
+        author: string;
+        coverImageUrl: string | null;
+    } | null;
     students?: {
         student: {
             fullName: string;
@@ -51,6 +55,11 @@ export interface Borrowing {
     }[];
 }
 
+export interface Student {
+  id: string;
+  fullName: string;
+  email: string;
+}
 export interface Student {
   id: string;
   fullName: string;

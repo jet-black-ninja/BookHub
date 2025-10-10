@@ -5,6 +5,7 @@ import {
 	getBookDetails,
 	getCategories,
 	getMyBorrowings,
+	reportLostBook,
 	returnBook,
 } from '../controllers/student-books.controller.js';
 import {
@@ -28,5 +29,6 @@ router.get('/categories', getCategories);
 router.post('/borrow', borrowBook);
 router.get('/my-borrowings', getMyBorrowings);
 router.patch('/return/:borrowingId', returnBook);
+router.patch('/report-lost/:borrowingId', reportLostBook);
 
 export default router;

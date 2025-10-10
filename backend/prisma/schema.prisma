@@ -31,6 +31,12 @@ enum BorrowingStatus {
   LOST
 }
 
+enum DamageLevel {
+  NONE
+  SMALL
+  LARGE
+}
+
 model User {
   id           String             @id @default(uuid(7))
   email        String             @unique
@@ -96,12 +102,15 @@ model Borrowing {
 }
 
 model BorrowedBook {
-  id          String    @id @default(uuid(7))
-  borrowingId String    @map("borrowing_id")
-  bookId      String    @map("book_id")
-  returned    Boolean   @default(false)
-  borrowing   Borrowing @relation(fields: [borrowingId], references: [id], onDelete: Cascade)
-  book        Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  id            String       @id @default(uuid(7))
+  borrowingId   String       @map("borrowing_id")
+  bookId        String       @map("book_id")
+  returned      Boolean      @default(false)
+  damageLevel   DamageLevel  @default(NONE) @map("damage_level")
+  damageNotes   String?      @map("damage_notes")
+  damageFine    Decimal      @default(0) @map("damage_fine") @db.Decimal(10, 2)
+  borrowing     Borrowing    @relation(fields: [borrowingId], references: [id], onDelete: Cascade)
+  book          Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@map("borrowed_books")
 }
@@ -118,11 +127,13 @@ model BorrowingStudent {
 }
 
 model FineConfig {
-  id                 String   @id @default(uuid(7))
-  dailyFine          Decimal  @default(50.00) @map("daily_fine") @db.Decimal(10, 2)
-  lostBookMultiplier Decimal  @default(2.00) @map("lost_book_multiplier") @db.Decimal(3, 2)
-  overdueThreshold   Int      @default(30) @map("overdue_threshold")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(uuid(7))
+  dailyFine             Decimal  @default(50.00) @map("daily_fine") @db.Decimal(10, 2)
+  lostBookMultiplier    Decimal  @default(2.00) @map("lost_book_multiplier") @db.Decimal(3, 2)
+  smallDamagePercentage Decimal  @default(0.10) @map("small_damage_percentage") @db.Decimal(3, 2)
+  largeDamagePercentage Decimal  @default(0.50) @map("large_damage_percentage") @db.Decimal(3, 2)
+  overdueThreshold      Int      @default(30) @map("overdue_threshold")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   @@map("fine_config")
 }

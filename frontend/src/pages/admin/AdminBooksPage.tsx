@@ -46,7 +46,7 @@ export const AdminBooksPage = () => {
       const formData = new FormData();
       formData.append("title", newBook.title);
       formData.append("author", newBook.author);
-      formData.append("categoryId", newBook.category?.id || "");
+      formData.append("categoryId", newBook.Category?.id || "");
       formData.append("price", String(newBook.price));
       formData.append("totalCopies", String(newBook.totalCopies || 1));
       formData.append("isbn", newBook.isbn || "");
@@ -76,7 +76,7 @@ export const AdminBooksPage = () => {
       const formData = new FormData();
       if (updatedBook.title) formData.append("title", updatedBook.title);
       if (updatedBook.author) formData.append("author", updatedBook.author);
-      if (updatedBook.category) formData.append("categoryId", updatedBook.category.id);
+      if (updatedBook.Category) formData.append("categoryId", updatedBook.Category.id);
       if (updatedBook.price !== undefined) formData.append("price", String(updatedBook.price));
       if (updatedBook.totalCopies !== undefined)
         formData.append("totalCopies", String(updatedBook.totalCopies));
@@ -133,9 +133,9 @@ export const AdminBooksPage = () => {
           />
           <Input
             placeholder="Category ID"
-            value={newBook.category?.id || ""}
+            value={newBook.Category?.id || ""}
             onChange={(e) =>
-              setNewBook({ ...newBook, category: { id: e.target.value, name: "" } })
+              setNewBook({ ...newBook, Category: { id: e.target.value, name: "" } })
             }
           />
           <Input
@@ -183,7 +183,7 @@ export const AdminBooksPage = () => {
               <tr key={book.id} className="border-t hover:bg-gray-50">
                 <td className="p-3">{book.title}</td>
                 <td className="p-3">{book.author}</td>
-                <td className="p-3">{book.category.name}</td>
+                <td className="p-3">{book.Category.name}</td>
                 <td className="p-3">₹{book.price}</td>
                 <td className="p-3">
                   {book.availableCopies}/{book.totalCopies}

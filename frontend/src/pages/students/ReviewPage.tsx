@@ -16,16 +16,32 @@ const reviewSchema = z.object({
     title: z.string().min(3, "Title is required"),
     content: z.string().min(10, "Comment is required"),
     rating: z.number().min(1).max(5),
-    imageUrl: z.string().optional(),
+    image: z.any().optional(), // Changed from imageUrl to image for file upload
 });
 
 export type ReviewFormType = z.infer<typeof reviewSchema>;
+
+// Types for API responses
+interface BorrowedBookResponse {
+    id: string;
+    book?: {
+        id: string;
+        title: string;
+        author: string;
+        coverImageUrl?: string;
+    } | null;
+}
+
+interface BookOption {
+    id: string;
+    title: string;
+}
 
 export const ReviewPage = () => {
     const { user } = useAuth();
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
-    const [borrowedBooks, setBorrowedBooks] = useState<{ id: string; title: string }[]>([]);
+    const [borrowedBooks, setBorrowedBooks] = useState<BookOption[]>([]);
 
     const form = useForm<ReviewFormType>({
         resolver: zodResolver(reviewSchema),
@@ -34,12 +50,13 @@ export const ReviewPage = () => {
             title: "",
             content: "",
             rating: 5,
-            imageUrl: "",
+            image: undefined,
         },
     });
 
 
     const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    
     useEffect(() => {
         const fetchBorrowedBooks = async () => {
             const token = localStorage.getItem("token");
@@ -51,26 +68,44 @@ export const ReviewPage = () => {
                     },
                 });
                 const data = await res.json();
-                setBorrowedBooks(data.data || []);
-            } catch (err) {
-                console.log(err);
+                // Map the response to extract book information from nested structure
+                const books = (data.data || []).map((borrowing: BorrowedBookResponse): BookOption => ({
+                    id: borrowing.book?.id || borrowing.id, // Use book ID from the nested book object
+                    title: borrowing.book?.title || 'Unknown Title'
+                })).filter((book: BookOption) => book.title !== 'Unknown Title' && book.id); // Filter out books without titles or IDs
+                setBorrowedBooks(books);
+            } catch (error) {
+                console.log(error);
             }
         };
         if (user) fetchBorrowedBooks();
-    }, [user]);
+    }, [user, BASE_URL]);
 
     const onSubmit = async (values: ReviewFormType) => {
         setError("");
         setSuccess("");
         const token = localStorage.getItem("token");
         try {
-            const res = await fetch(`${BASE_URL}/student/reviews`, {
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append("bookId", values.bookId);
+            formData.append("title", values.title);
+            formData.append("content", values.content);
+            formData.append("rating", values.rating.toString());
+            formData.append("studentId", user?.id || "");
+            
+            // Add image file if provided
+            if (values.image && values.image[0]) {
+                formData.append("image", values.image[0]);
+            }
+
+            const res = await fetch(`${BASE_URL}/reviews`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
+                    // Don't set Content-Type for FormData, let browser set it with boundary
                 },
-                body: JSON.stringify({ ...values, studentId: user?.id }),
+                body: formData,
             });
             const data = await res.json();
 
@@ -78,7 +113,7 @@ export const ReviewPage = () => {
             else setSuccess("Review submitted successfully!");
 
             form.reset();
-        } catch (err) {
+        } catch {
             setError("Something went wrong");
         }
     };
@@ -147,11 +182,15 @@ export const ReviewPage = () => {
 
                     <FormField
                         control={form.control}
-                        name="imageUrl"
+                        name="image"
                         render={({ field }) => (
                             <FormItem>
-                                <Label>Image URL (optional)</Label>
-                                <Input placeholder="Image URL" {...field} />
+                                <Label>Upload Image (optional)</Label>
+                                <Input 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={(e) => field.onChange(e.target.files)}
+                                />
                                 <FormMessage />
                             </FormItem>
                         )}

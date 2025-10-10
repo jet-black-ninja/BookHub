@@ -1,9 +1,19 @@
 import type { Borrowing } from "@/schemas/library";
 import { useEffect, useState } from "react";
+import { ReturnBookModal } from "@/components/ReturnBookModal";
 
 export default function BorrowingsPage() {
   const [borrowings, setBorrowings] = useState<Borrowing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [returnModal, setReturnModal] = useState<{
+    isOpen: boolean;
+    borrowingId: string;
+    bookTitle: string;
+  }>({
+    isOpen: false,
+    borrowingId: "",
+    bookTitle: "",
+  });
 
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -30,30 +40,25 @@ export default function BorrowingsPage() {
     fetchBorrowings();
   }, []);
 
-  // Handle returning a book
-  const handleReturnBook = async (borrowingId: string) => {
-    const token = localStorage.getItem("token");
-    try {
-      const res = await fetch(
-        `${BASE_URL}/student/return/${borrowingId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        alert("Book returned successfully");
-        fetchBorrowings(); // refresh borrowings
-      } else {
-        alert(data.message);
-      }
-    } catch (err) {
-      console.error("Failed to return book:", err);
-    }
+  // Handle returning a book - opens modal
+  const handleReturnBook = (borrowingId: string, bookTitle: string) => {
+    setReturnModal({
+      isOpen: true,
+      borrowingId,
+      bookTitle,
+    });
+  };
+
+  const handleCloseReturnModal = () => {
+    setReturnModal({
+      isOpen: false,
+      borrowingId: "",
+      bookTitle: "",
+    });
+  };
+
+  const handleReturnSuccess = () => {
+    fetchBorrowings(); // Refresh the borrowings list
   };
 
   if (loading) return <p>Loading your borrowings...</p>;
@@ -93,42 +98,55 @@ export default function BorrowingsPage() {
                 >
                   Status: {b.status}
                 </p>
-                {b.totalFine > 0 && (
+                {Number(b.totalFine) > 0 && (
                   <p className="text-red-600 font-medium">
-                    Fine: ₹{b.totalFine.toFixed(2)}
+                    Fine: ₹{Number(b.totalFine).toFixed(2)}
                   </p>
                 )}
               </div>
 
-              {/* Loop over borrowed books */}
-              {b.BorrowedBook.map((bb) => (
-                <div key={bb.id} className="mb-4 border p-2 rounded-lg">
-                  {bb.book.coverImageUrl && (
+              {/* Display borrowed book */}
+              {b.book ? (
+                <div className="mb-4 border p-2 rounded-lg">
+                  {b.book.coverImageUrl && (
                     <img
-                      src={bb.book.coverImageUrl}
-                      alt={bb.book.title}
+                      src={b.book.coverImageUrl}
+                      alt={b.book.title}
                       className="w-full h-40 object-cover rounded-lg mb-2"
                     />
                   )}
-                  <h3 className="text-lg font-semibold">{bb.book.title}</h3>
-                  <p className="text-sm text-gray-600">by {bb.book.author}</p>
+                  <h3 className="text-lg font-semibold">{b.book.title}</h3>
+                  <p className="text-sm text-gray-600">by {b.book.author}</p>
 
                   <button
-                    disabled={bb.returned}
-                    className={`mt-2 w-full px-3 py-1 rounded ${bb.returned
+                    disabled={b.status !== "ACTIVE"}
+                    className={`mt-2 w-full px-3 py-1 rounded ${b.status !== "ACTIVE"
                       ? "bg-gray-300 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700 text-white"
                       }`}
-                    onClick={() => handleReturnBook(b.id)}
+                    onClick={() => handleReturnBook(b.id, b.book?.title || "Unknown Book")}
                   >
-                    {bb.returned ? "Returned" : "Return Book"}
+                    {b.status === "RETURNED" ? "Returned" : "Return Book"}
                   </button>
                 </div>
-              ))}
+              ) : (
+                <div className="mb-4 border p-2 rounded-lg text-center text-gray-500">
+                  <p>No book information available</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+
+      {/* Return Book Modal */}
+      <ReturnBookModal
+        isOpen={returnModal.isOpen}
+        onClose={handleCloseReturnModal}
+        borrowingId={returnModal.borrowingId}
+        bookTitle={returnModal.bookTitle}
+        onReturnSuccess={handleReturnSuccess}
+      />
     </div>
   );
 }
