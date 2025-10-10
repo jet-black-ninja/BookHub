@@ -84,7 +84,6 @@ A minimal library management system with role-based access for admins and studen
 
 ### Frontend
 - **React** - UI library
-- **Zustand** - State management
 - **React Router** - Navigation
 - **Tailwind CSS** - Styling
 - **Hosting** - GitHub Pages

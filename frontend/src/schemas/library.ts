@@ -2,6 +2,11 @@
 export interface Category {
   id: string;
   name: string;
+  description?: string;
+  createdAt?: string;
+  _count?: {
+    books: number;
+  };
 }
 
 export interface Book {

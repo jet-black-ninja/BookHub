@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Home, BookOpen, Clock, IndianRupeeIcon } from 'lucide-react';
+import { Home, BookOpen, Clock, IndianRupeeIcon, FolderOpen } from 'lucide-react';
 
 export const Sidebar = () => {
   const { user } = useAuth();
@@ -20,7 +20,8 @@ export const Sidebar = () => {
   // Admin Navigation
   const adminLinks = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/admin/books', label: 'Manage Books', icon: BookOpen }
+    { path: '/admin/books', label: 'Manage Books', icon: BookOpen },
+    { path: '/admin/categories', label: 'Manage Categories', icon: FolderOpen }
   ];
 
   const links = user?.role === 'ADMIN' ? adminLinks : studentLinks;

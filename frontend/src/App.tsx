@@ -12,6 +12,7 @@ import FinesPage from "./pages/students/FinesPage";
 import { ReviewPage } from "./pages/students/ReviewPage";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AdminBooksPage } from "./pages/admin/AdminBooksPage";
+import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminRoute } from "./components/AdminRoute";
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="books" element={<AdminBooksPage />} />
+          <Route path="categories" element={<AdminCategoriesPage />} />
         </Route>
       </Route>
 

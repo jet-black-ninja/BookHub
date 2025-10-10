@@ -1,7 +1,8 @@
 import type { Book } from "@/schemas/library";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { CategorySelect } from "@/components/CategorySelect";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -11,11 +12,12 @@ export const AdminBooksPage = () => {
   const [newBook, setNewBook] = useState<Partial<Book>>({});
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
   const token = localStorage.getItem("token");
 
   // Fetch all books
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`${BASE_URL}/books?includeDeleted=false&page=1&limit=100`, {
@@ -28,16 +30,16 @@ export const AdminBooksPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchBooks();
-  }, []);
+  }, [fetchBooks]);
 
   // Add a new book
   const addBook = async () => {
-    if (!newBook.title || !newBook.author || !newBook.price) {
-      alert("Please fill title, author, and price.");
+    if (!newBook.title || !newBook.author || !newBook.price || !selectedCategoryId) {
+      alert("Please fill title, author, price, and select a category.");
       return;
     }
 
@@ -46,7 +48,7 @@ export const AdminBooksPage = () => {
       const formData = new FormData();
       formData.append("title", newBook.title);
       formData.append("author", newBook.author);
-      formData.append("categoryId", newBook.Category?.id || "");
+      formData.append("categoryId", selectedCategoryId);
       formData.append("price", String(newBook.price));
       formData.append("totalCopies", String(newBook.totalCopies || 1));
       formData.append("isbn", newBook.isbn || "");
@@ -61,6 +63,7 @@ export const AdminBooksPage = () => {
       console.log("Book added:", data);
 
       setNewBook({});
+      setSelectedCategoryId("");
       setCoverFile(null);
       fetchBooks(); // Refresh list
     } catch (err) {
@@ -71,12 +74,12 @@ export const AdminBooksPage = () => {
   };
 
   // Edit/update a book
-  const updateBook = async (id: string, updatedBook: Partial<Book>, coverFile?: File) => {
+  const updateBook = async (id: string, updatedBook: Partial<Book>, categoryId?: string, coverFile?: File) => {
     try {
       const formData = new FormData();
       if (updatedBook.title) formData.append("title", updatedBook.title);
       if (updatedBook.author) formData.append("author", updatedBook.author);
-      if (updatedBook.Category) formData.append("categoryId", updatedBook.Category.id);
+      if (categoryId) formData.append("categoryId", categoryId);
       if (updatedBook.price !== undefined) formData.append("price", String(updatedBook.price));
       if (updatedBook.totalCopies !== undefined)
         formData.append("totalCopies", String(updatedBook.totalCopies));
@@ -120,7 +123,7 @@ export const AdminBooksPage = () => {
       {/* Add Book Form */}
       <div className="mb-6 p-4 border rounded-lg bg-gray-50">
         <h2 className="text-lg font-semibold mb-2">Add New Book</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <Input
             placeholder="Title"
             value={newBook.title || ""}
@@ -131,12 +134,12 @@ export const AdminBooksPage = () => {
             value={newBook.author || ""}
             onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
           />
-          <Input
-            placeholder="Category ID"
-            value={newBook.Category?.id || ""}
-            onChange={(e) =>
-              setNewBook({ ...newBook, Category: { id: e.target.value, name: "" } })
-            }
+          <CategorySelect
+            value={selectedCategoryId}
+            onValueChange={setSelectedCategoryId}
+            label=""
+            placeholder="Select Category"
+            required
           />
           <Input
             type="number"
@@ -150,13 +153,41 @@ export const AdminBooksPage = () => {
             value={newBook.totalCopies || 1}
             onChange={(e) => setNewBook({ ...newBook, totalCopies: Number(e.target.value) })}
           />
-          <Input type="file" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
           <Input
             placeholder="ISBN"
             value={newBook.isbn || ""}
             onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
           />
-
+        </div>
+        
+        {/* Cover Image Upload */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Cover Image
+          </label>
+          <Input 
+            type="file" 
+            accept="image/*"
+            onChange={(e) => setCoverFile(e.target.files?.[0] || null)} 
+            className="mb-2"
+          />
+          {coverFile && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                📁 {coverFile.name}
+              </span>
+              <span className="text-gray-500">
+                ({(coverFile.size / 1024).toFixed(1)} KB)
+              </span>
+              <button
+                type="button"
+                onClick={() => setCoverFile(null)}
+                className="text-red-500 hover:text-red-700 ml-2"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
         <Button onClick={addBook} disabled={adding}>
           {adding ? "Adding..." : "Add Book"}
