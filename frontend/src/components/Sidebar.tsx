@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Home, BookOpen, Clock, IndianRupeeIcon, FolderOpen } from 'lucide-react';
+import { Home, BookOpen, Clock, FolderOpen } from 'lucide-react';
 
 export const Sidebar = () => {
   const { user } = useAuth();
